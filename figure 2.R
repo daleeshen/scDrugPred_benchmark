@@ -1,4 +1,5 @@
-setwd('D:/scDrugPredict_benchmark/')
+# Please change the path here before you run the script.
+setwd('./')
 
 library(ggplot2)
 library(dplyr)
@@ -6,14 +7,14 @@ library(forcats)
 library(stringr)
 library(tidyr)
 
-INPUT_DIR  <- "./"
-OUTPUT_DIR <- "./plots"
+INPUT_DIR  <- "../data/"
+OUTPUT_DIR <- '../results/'
 
 
 # ==============================================================================
 # 1. Data Preprocessing & Merging
 # ==============================================================================
-final_merged_df<-read.csv('./bal_final_merged_data.csv', header = T)
+final_merged_df<-read.csv(paste0(INPUT_DIR, 'bal_final_merged_data.csv'), header = T)
 meta <- read.csv(file.path(INPUT_DIR, 'drmref_dataInfo.csv'), header = TRUE)
 meta_brief <- read.csv(file.path(INPUT_DIR, 'dataset_drug_single.csv'), header = TRUE)
 

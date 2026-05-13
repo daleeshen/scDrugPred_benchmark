@@ -1,13 +1,13 @@
 # Please change the path here before you run the script.
-setwd('D:/scDrugPredict_benchmark/final_submission_files/new_files/codes/')
+setwd('./')
 
 library(Seurat)
 library(tidyverse)
 library(tidytext)
 
-data_dir <- "./data"
-fig_dir <- "./plots"
-dir.create(fig_dir, recursive = TRUE, showWarnings = FALSE)
+data_dir <- "../data"
+fig_dir <- '../results/'
+# dir.create(fig_dir, recursive = TRUE, showWarnings = FALSE)
 
 df <- read.csv(file.path(data_dir, "preS_vs_R_perform.csv"), header = TRUE)
 
@@ -67,7 +67,7 @@ ggplot(df_sum, aes(x = Method_sorted, y = mean, fill = Method)) +
 dev.off()
 
 
-load(file.path(data_dir, "./figure.4A_B.RData"))
+load(file.path(data_dir, "/figure.4A_B.RData"))
 
 my_umap_theme <- theme_bw() + 
   theme(

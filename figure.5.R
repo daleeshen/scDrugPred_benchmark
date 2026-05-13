@@ -1,5 +1,5 @@
 # Please change the path here before you run the script.
-setwd('D:/scDrugPredict_benchmark/final_submission_files/new_files/codes/')
+setwd('./')
 
 library(dplyr)
 library(ggplot2)
@@ -12,41 +12,42 @@ library(msigdbr)
 library(enrichplot)
 library(aplot)
 library(GSVA)
-library(UCell)
+library(AUCell)
 library(monocle)
 library(ClusterGVis)
 library(stringr)
 library(tidyr)
+library(rlang)
+
+fig_path <- '../results/'
+# dir.create(fig_path, showWarnings = FALSE, recursive = TRUE)
 
 # ------------------------------------------------------------------------------
 # 0. Load Data
 # ------------------------------------------------------------------------------
 cat("Loading pre-computed RData...\n")
-load('./data/PDAC_Drug_Prediction_Plotting.RData')
-
-# Create plots directory if it doesn't exist
-dir.create('./plots', showWarnings = FALSE)
+load('../data/PDAC_Drug_Prediction_Plotting.RData')
 
 # ------------------------------------------------------------------------------
 # 1. Global UMAP & Sample Barplots
 # ------------------------------------------------------------------------------
 cat("Generating Global UMAP and Sample Barplots...\n")
 
-png('./plots/pdac_treatment_umap.png', units = 'in', res = 300, width = 6, height = 5)
+png(paste0(fig_path, 'pdac_treatment_umap.png'), units = 'in', res = 300, width = 6, height = 5)
 DimPlot(obj.int, group.by = 'treatment', pt.size = 1) + 
   theme(text = element_text(size = 24)) + 
   labs(title = NULL, x = "UMAP1", y = "UMAP2") + 
   scale_color_manual(values = c(my_colors[1], my_colors[3], my_colors[4]))
 dev.off()
 
-png('./plots/pal_dmso_umap.png', units = 'in', res = 300, width = 6, height = 5)
+png(paste0(fig_path, 'pal_dmso_umap.png'), units = 'in', res = 300, width = 6, height = 5)
 DimPlot(pal_dmso, group.by = 'treatment', pt.size = 1) + 
   theme(text = element_text(size = 24)) + 
   labs(title = NULL, x = "UMAP1", y = "UMAP2") +
   scale_color_manual(values = c(my_colors[1], my_colors[3]))
 dev.off()
 
-png('./plots/tram_dmso_umap.png', units = 'in', res = 300, width = 6, height = 5)
+png(paste0(fig_path, 'tram_dmso_umap.png'), units = 'in', res = 300, width = 6, height = 5)
 DimPlot(tram_dmso, group.by = 'treatment', pt.size = 1) + 
   theme(text = element_text(size = 24)) + 
   labs(title = NULL, x = "UMAP1", y = "UMAP2") +
@@ -58,7 +59,7 @@ df_bar <- obj.int@meta.data %>%
   group_by(sample, treatment) %>%
   summarise(count = n(), .groups = "drop")
 
-png('./plots/pdac_sample_barplot.png', units = 'in', res = 300, width = 5, height = 5, bg = "transparent")
+png(paste0(fig_path, 'pdac_sample_barplot.png'), units = 'in', res = 300, width = 5, height = 5, bg = "transparent")
 ggplot(df_bar, aes(x = sample, y = count, fill = treatment)) +
   geom_bar(stat = "identity", color = 'black') +
   labs(x = NULL, y = "Cell counts", fill = NULL) +
@@ -126,11 +127,11 @@ plot_single_drug <- function(data, target_drug, my_colors) {
     )
 }
 
-png('./plots/pal_perform_all.png', res = 300, units = 'in', width = 12, height = 4)
+png(paste0(fig_path, 'pal_perform_all.png'), res = 300, units = 'in', width = 12, height = 4)
 plot_single_drug(markus_all_eval_df, "paclitaxel", my_colors_by_tools)
 dev.off()
 
-png('./plots/tram_perform_all.png', res = 300, units = 'in', width = 12, height = 4)
+png(paste0(fig_path, 'tram_perform_all.png'), res = 300, units = 'in', width = 12, height = 4)
 plot_single_drug(markus_all_eval_df, "trametinib", my_colors_by_tools)
 dev.off()
 
@@ -144,7 +145,7 @@ pal_cells_ordered <- rownames(pal_dmso@meta.data)[order(pal_dmso$scDEAL_pred, de
 pal_min_val <- min(pal_dmso$scDEAL_pred, na.rm = TRUE)
 pal_max_val <- max(pal_dmso$scDEAL_pred, na.rm = TRUE)
 
-png('./plots/pal_scDEAL_umap.png', units = 'in', res = 300, width = 6, height = 6)
+png(paste0(fig_path, 'pal_scDEAL_umap.png'), units = 'in', res = 300, width = 6, height = 6)
 FeaturePlot(pal_dmso, features = 'scDEAL_pred', cells = pal_cells_ordered, cols = c(my_colors[3], my_colors[1]), pt.size = 1) + 
   theme(text = element_text(size = 24),
         axis.text = element_text(size = 20, color = "black"),
@@ -164,7 +165,7 @@ tram_cells_ordered <- rownames(tram_dmso@meta.data)[order(tram_dmso$scDEAL_pred,
 tram_min_val <- min(tram_dmso$scDEAL_pred, na.rm = TRUE)
 tram_max_val <- max(tram_dmso$scDEAL_pred, na.rm = TRUE)
 
-png('./plots/tram_scDEAL_umap.png', units = 'in', res = 300, width = 6, height = 7)
+png(paste0(fig_path, 'tram_scDEAL_umap.png'), units = 'in', res = 300, width = 6, height = 7)
 FeaturePlot(tram_dmso, features = 'scDEAL_pred', cells = tram_cells_ordered, cols = c(my_colors[3], my_colors[1]), pt.size = 1) + 
   theme(text = element_text(size = 24),
         axis.text = element_text(size = 20, color = "black"),
@@ -181,7 +182,7 @@ FeaturePlot(tram_dmso, features = 'scDEAL_pred', cells = tram_cells_ordered, col
 dev.off()
 
 # -- Density Plots --
-png('./plots/pal_scDEAL_pred_density.png', units = 'in', res = 300, width = 6, height = 7)
+png(paste0(fig_path, 'pal_scDEAL_pred_density.png'), units = 'in', res = 300, width = 6, height = 7)
 ggplot(pal_dmso@meta.data, aes(x = scDEAL_pred, color = condition)) +
   geom_density(linewidth = 2.2, key_glyph = "path") +
   scale_x_continuous(breaks = c(0, 0.5, 1), limits = c(0, 1)) +
@@ -191,7 +192,7 @@ ggplot(pal_dmso@meta.data, aes(x = scDEAL_pred, color = condition)) +
   labs(title = NULL, x = NULL, y = "Density")
 dev.off()
 
-png('./plots/tram_scDEAL_pred_density.png', units = 'in', res = 300, width = 6, height = 7)
+png(paste0(fig_path, 'tram_scDEAL_pred_density.png'), units = 'in', res = 300, width = 6, height = 7)
 ggplot(tram_dmso@meta.data, aes(x = scDEAL_pred, color = condition)) +
   geom_density(linewidth = 2.2, key_glyph = "path") +
   scale_x_continuous(breaks = c(0, 0.5, 1), limits = c(0, 1)) +
@@ -202,7 +203,7 @@ ggplot(tram_dmso@meta.data, aes(x = scDEAL_pred, color = condition)) +
 dev.off()
 
 # -- Violin Plots --
-png('./plots/pal_scDEAL_pred_violin.png', units = 'in', res = 300, width = 4, height = 5)
+png(paste0(fig_path, 'pal_scDEAL_pred_violin.png'), units = 'in', res = 300, width = 4, height = 5)
 ggplot(pal_dmso@meta.data, aes(x = condition, y = scDEAL_pred, fill = condition)) +
   geom_violin(trim = TRUE, alpha = 1, color = NA) + 
   geom_boxplot(width = 0.03, fill = "white", color = "black", outlier.shape = NA) + 
@@ -217,7 +218,7 @@ ggplot(pal_dmso@meta.data, aes(x = condition, y = scDEAL_pred, fill = condition)
   theme(legend.position = "none", text = element_text(size = 28), axis.title.y = element_text(size = 20)) 
 dev.off()
 
-png('./plots/tram_scDEAL_pred_violin.png', units = 'in', res = 300, width = 4, height = 5)
+png(paste0(fig_path, 'tram_scDEAL_pred_violin.png'), units = 'in', res = 300, width = 4, height = 5)
 ggplot(tram_dmso@meta.data, aes(x = condition, y = scDEAL_pred, fill = condition)) +
   geom_violin(trim = TRUE, alpha = 1, color = NA) + 
   geom_boxplot(width = 0.03, fill = "white", color = "black", outlier.shape = NA) + 
@@ -242,7 +243,7 @@ Idents(pal_dmso) <- "scDEAL_pred_cond"
 Idents(tram_dmso) <- "scDEAL_pred_cond"
 
 # -- Target Genes Expression --
-png('./plots/tram_tar_MAP2K1.png', units = 'in', res = 300, height = 6, width = 5)
+png(paste0(fig_path, 'tram_tar_MAP2K1.png'), units = 'in', res = 300, height = 6, width = 5)
 VlnPlot(tram_dmso, features = 'MAP2K1') + 
   scale_fill_manual(values = c('skyblue','tomato')) +
   annotate("segment", x = 1, xend = 2, y = 2.3, yend = 2.3, colour = "black") +
@@ -251,7 +252,7 @@ VlnPlot(tram_dmso, features = 'MAP2K1') +
   theme(text = element_text(size = 18), axis.text = element_text(size = 18), axis.title.x = element_blank(), axis.text.x = element_text(angle = 0, hjust = 0.5)) + NoLegend()
 dev.off()
 
-png('./plots/tram_tar_MAP2K2.png', units = 'in', res = 300, height = 6, width = 5)
+png(paste0(fig_path, 'tram_tar_MAP2K2.png'), units = 'in', res = 300, height = 6, width = 5)
 VlnPlot(tram_dmso, features = 'MAP2K2') + 
   scale_fill_manual(values = c('skyblue','tomato')) +
   annotate("segment", x = 1, xend = 2, y = 2.8, yend = 2.8, colour = "black") +
@@ -260,7 +261,7 @@ VlnPlot(tram_dmso, features = 'MAP2K2') +
   theme(text = element_text(size = 18), axis.text = element_text(size = 18), axis.title.x = element_blank(), axis.text.x = element_text(angle = 0, hjust = 0.5)) + NoLegend()
 dev.off()
 
-png('./plots/pal_tar_TUBB1.png', units = 'in', res = 300, height = 6, width = 5)
+png(paste0(fig_path, 'pal_tar_TUBB1.png'), units = 'in', res = 300, height = 6, width = 5)
 VlnPlot(pal_dmso, features = 'TUBB1') + 
   scale_fill_manual(values = c('skyblue','tomato')) +
   annotate("segment", x = 1, xend = 2, y = 1.3, yend = 1.3, colour = "black") +
@@ -273,7 +274,7 @@ dev.off()
 pal_plot_df <- pal_dmso@meta.data
 tram_plot_df <- tram_dmso@meta.data
 
-png('./plots/pal_ssGSEA_apoptosis.png', units = 'in', res = 300, height = 6, width = 5)
+png(paste0(fig_path, 'pal_ssGSEA_apoptosis.png'), units = 'in', res = 300, height = 6, width = 5)
 ggplot(pal_plot_df, aes(x = scDEAL_pred_cond, y = HALLMARK_APOPTOSIS, fill = scDEAL_pred_cond)) +
   geom_violin(trim = FALSE, alpha = 0.7) + geom_boxplot(width = 0.1, fill = "white", outlier.shape = NA) +
   scale_fill_manual(values = c('tomato', 'skyblue')) + theme_classic() +
@@ -283,7 +284,7 @@ ggplot(pal_plot_df, aes(x = scDEAL_pred_cond, y = HALLMARK_APOPTOSIS, fill = scD
   annotate("text", x = 1.5, y = 0.42, label = "p = 0.071", size = 5) + ylim(NA, 0.45)
 dev.off()
 
-png('./plots/pal_ssGSEA_g2m.png', units = 'in', res = 300, height = 6, width = 5)
+png(paste0(fig_path, 'pal_ssGSEA_g2m.png'), units = 'in', res = 300, height = 6, width = 5)
 ggplot(pal_plot_df, aes(x = scDEAL_pred_cond, y = HALLMARK_G2M_CHECKPOINT, fill = scDEAL_pred_cond)) +
   geom_violin(trim = FALSE, alpha = 0.7) + geom_boxplot(width = 0.1, fill = "white", outlier.shape = NA) +
   scale_fill_manual(values = c('tomato', 'skyblue')) + theme_classic() +
@@ -293,7 +294,7 @@ ggplot(pal_plot_df, aes(x = scDEAL_pred_cond, y = HALLMARK_G2M_CHECKPOINT, fill 
   annotate("text", x = 1.5, y = 0.58, label = "p == 2.2 %*% 10^-16", parse = TRUE, size = 5) + ylim(NA, 0.6)
 dev.off()
 
-png('./plots/pal_ssGSEA_Microtubule_Stability.png', units = 'in', res = 300, height = 6, width = 5)
+png(paste0(fig_path, 'pal_ssGSEA_Microtubule_Stability.png'), units = 'in', res = 300, height = 6, width = 5)
 ggplot(pal_plot_df, aes(x = scDEAL_pred_cond, y = Microtubule_Stability_UCell, fill = scDEAL_pred_cond)) +
   geom_violin(trim = FALSE, alpha = 0.7) + geom_boxplot(width = 0.1, fill = "white", outlier.shape = NA) +
   scale_fill_manual(values = c('tomato', 'skyblue')) + theme_classic() +
@@ -303,7 +304,7 @@ ggplot(pal_plot_df, aes(x = scDEAL_pred_cond, y = Microtubule_Stability_UCell, f
   annotate("text", x = 1.5, y = 0.68, label = "p == 7.8 %*% 10^-12", parse = TRUE, size = 5) + ylim(NA, 0.7)
 dev.off()
 
-png('./plots/pal_ssGSEA_Paclitaxel_Resistance_UCell.png', units = 'in', res = 300, height = 6, width = 5)
+png(paste0(fig_path, 'pal_ssGSEA_Paclitaxel_Resistance_UCell.png'), units = 'in', res = 300, height = 6, width = 5)
 ggplot(subset(pal_plot_df, Paclitaxel_Resistance_UCell <= 0.05), aes(x = scDEAL_pred_cond, y = Paclitaxel_Resistance_UCell, fill = scDEAL_pred_cond)) +
   geom_violin(trim = FALSE, alpha = 0.7) + geom_boxplot(width = 0.1, fill = "white", outlier.shape = NA) +
   scale_fill_manual(values = c('tomato', 'skyblue')) + theme_classic() +
@@ -313,7 +314,7 @@ ggplot(subset(pal_plot_df, Paclitaxel_Resistance_UCell <= 0.05), aes(x = scDEAL_
   annotate("text", x = 1.5, y = 0.058, label = "p = 0.018", size = 5) + ylim(NA, 0.06)
 dev.off()
 
-png('./plots/tram_ssGSEA_KRAS_UP.png', units = 'in', res = 300, height = 6, width = 5)
+png(paste0(fig_path, 'tram_ssGSEA_KRAS_UP.png'), units = 'in', res = 300, height = 6, width = 5)
 ggplot(tram_plot_df, aes(x = scDEAL_pred_cond, y = HALLMARK_KRAS_SIGNALING_UP, fill = scDEAL_pred_cond)) +
   geom_violin(trim = FALSE, alpha = 0.7) + geom_boxplot(width = 0.1, fill = "white", outlier.shape = NA) +
   scale_fill_manual(values = c('tomato', 'skyblue')) + theme_classic() +
@@ -323,7 +324,7 @@ ggplot(tram_plot_df, aes(x = scDEAL_pred_cond, y = HALLMARK_KRAS_SIGNALING_UP, f
   annotate("text", x = 1.5, y = 0.25, label = "p == 2.2 %*% 10^-16", parse = TRUE, size = 5) + ylim(NA, 0.26)
 dev.off()
 
-png('./plots/tram_ssGSEA_EMT.png', units = 'in', res = 300, height = 6, width = 5)
+png(paste0(fig_path, 'tram_ssGSEA_EMT.png'), units = 'in', res = 300, height = 6, width = 5)
 ggplot(tram_plot_df, aes(x = scDEAL_pred_cond, y = HALLMARK_EPITHELIAL_MESENCHYMAL_TRANSITION, fill = scDEAL_pred_cond)) +
   geom_violin(trim = FALSE, alpha = 0.7) + geom_boxplot(width = 0.1, fill = "white", outlier.shape = NA) +
   scale_fill_manual(values = c('tomato', 'skyblue')) + theme_classic() +
@@ -333,7 +334,7 @@ ggplot(tram_plot_df, aes(x = scDEAL_pred_cond, y = HALLMARK_EPITHELIAL_MESENCHYM
   annotate("text", x = 1.5, y = 0.29, label = "p == 2.2 %*% 10^-16", parse = TRUE, size = 5) + ylim(NA, 0.3)
 dev.off()
 
-png('./plots/tram_ssGSEA_MAPK_Feedback_Targets_UCell.png', units = 'in', res = 300, height = 6, width = 5)
+png(paste0(fig_path, 'tram_ssGSEA_MAPK_Feedback_Targets_UCell.png'), units = 'in', res = 300, height = 6, width = 5)
 ggplot(tram_plot_df, aes(x = scDEAL_pred_cond, y = MAPK_Feedback_Targets_UCell, fill = scDEAL_pred_cond)) +
   geom_violin(trim = FALSE, alpha = 0.7) + geom_boxplot(width = 0.1, fill = "white", outlier.shape = NA) +
   scale_fill_manual(values = c('tomato', 'skyblue')) + theme_classic() +
@@ -349,40 +350,198 @@ dev.off()
 # ------------------------------------------------------------------------------
 cat("Generating Monocle2 Trajectory Plots...\n")
 
+# =========================================================================
+# Modernized plot_cell_trajectory
+# (Uses explicit namespaces to resolve dplyr deprecation and masking issues)
+# =========================================================================
+plot_cell_trajectory_modern <- function (cds, x = 1, y = 2, color_by = "State", show_tree = TRUE, 
+                                         show_backbone = TRUE, backbone_color = "black", markers = NULL, 
+                                         use_color_gradient = FALSE, markers_linear = FALSE, show_cell_names = FALSE, 
+                                         show_state_number = FALSE, cell_size = 1.5, cell_link_size = 0.75, 
+                                         cell_name_size = 2, state_number_size = 2.9, show_branch_points = TRUE, 
+                                         theta = 0, ...) 
+{
+  requireNamespace("igraph")
+  gene_short_name <- NA
+  sample_name <- NA
+  sample_state <- pData(cds)$State
+  data_dim_1 <- NA
+  data_dim_2 <- NA
+  lib_info_with_pseudo <- pData(cds)
+  
+  if (is.null(cds@dim_reduce_type)) {
+    stop("Error: dimensionality not yet reduced. Please call reduceDimension() before calling this function.")
+  }
+  
+  if (cds@dim_reduce_type == "ICA") {
+    reduced_dim_coords <- reducedDimS(cds)
+  } else if (cds@dim_reduce_type %in% c("simplePPT", "DDRTree")) {
+    reduced_dim_coords <- reducedDimK(cds)
+  } else {
+    stop("Error: unrecognized dimensionality reduction method.")
+  }
+  
+  # Explicitly use dplyr:: and tibble:: to prevent namespace conflicts
+  ica_space_df <- Matrix::t(reduced_dim_coords) %>% as.data.frame() %>% 
+    dplyr::select(prin_graph_dim_1 = dplyr::all_of(x), prin_graph_dim_2 = dplyr::all_of(y)) %>% 
+    dplyr::mutate(sample_name = rownames(.), sample_state = rownames(.))
+  
+  dp_mst <- minSpanningTree(cds)
+  if (is.null(dp_mst)) {
+    stop("You must first call orderCells() before using this function")
+  }
+  
+  edge_df <- dp_mst %>% igraph::as_data_frame() %>% 
+    dplyr::select(source = from, target = to) %>% 
+    dplyr::left_join(ica_space_df %>% dplyr::select(source = sample_name, 
+                                                    source_prin_graph_dim_1 = prin_graph_dim_1, 
+                                                    source_prin_graph_dim_2 = prin_graph_dim_2), 
+                     by = "source") %>% 
+    dplyr::left_join(ica_space_df %>% dplyr::select(target = sample_name, 
+                                                    target_prin_graph_dim_1 = prin_graph_dim_1, 
+                                                    target_prin_graph_dim_2 = prin_graph_dim_2), 
+                     by = "target")
+  
+  data_df <- t(monocle::reducedDimS(cds)) %>% as.data.frame() %>% 
+    dplyr::select(data_dim_1 = dplyr::all_of(x), data_dim_2 = dplyr::all_of(y)) %>% 
+    tibble::rownames_to_column("sample_name") %>% 
+    dplyr::mutate(sample_state) %>% 
+    dplyr::left_join(lib_info_with_pseudo %>% tibble::rownames_to_column("sample_name"), by = "sample_name")
+  
+  return_rotation_mat <- function(theta) {
+    theta <- theta/180 * pi
+    matrix(c(cos(theta), sin(theta), -sin(theta), cos(theta)), nrow = 2)
+  }
+  
+  rot_mat <- return_rotation_mat(theta)
+  cn1 <- c("data_dim_1", "data_dim_2")
+  cn2 <- c("source_prin_graph_dim_1", "source_prin_graph_dim_2")
+  cn3 <- c("target_prin_graph_dim_1", "target_prin_graph_dim_2")
+  data_df[, cn1] <- as.matrix(data_df[, cn1]) %*% t(rot_mat)
+  edge_df[, cn2] <- as.matrix(edge_df[, cn2]) %*% t(rot_mat)
+  edge_df[, cn3] <- as.matrix(edge_df[, cn3]) %*% t(rot_mat)
+  markers_exprs <- NULL
+  
+  if (is.null(markers) == FALSE) {
+    markers_fData <- subset(fData(cds), gene_short_name %in% markers)
+    if (nrow(markers_fData) >= 1) {
+      markers_exprs <- reshape2::melt(as.matrix(exprs(cds[row.names(markers_fData), ])))
+      colnames(markers_exprs)[1:2] <- c("feature_id", "cell_id")
+      markers_exprs <- merge(markers_exprs, markers_fData, by.x = "feature_id", by.y = "row.names")
+      markers_exprs$feature_label <- as.character(markers_exprs$gene_short_name)
+      markers_exprs$feature_label[is.na(markers_exprs$feature_label)] <- markers_exprs$Var1
+    }
+  }
+  
+  if (is.null(markers_exprs) == FALSE && nrow(markers_exprs) > 0) {
+    data_df <- merge(data_df, markers_exprs, by.x = "sample_name", by.y = "cell_id")
+    if (use_color_gradient) {
+      if (markers_linear) {
+        g <- ggplot(data = data_df, aes(x = data_dim_1, y = data_dim_2)) + 
+          geom_point(aes(color = value), size = I(cell_size), na.rm = TRUE) + 
+          scale_color_viridis(name = paste0("value"), ...) + facet_wrap(~feature_label)
+      } else {
+        g <- ggplot(data = data_df, aes(x = data_dim_1, y = data_dim_2)) + 
+          geom_point(aes(color = log10(value + 0.1)), size = I(cell_size), na.rm = TRUE) + 
+          scale_color_viridis(name = paste0("log10(value + 0.1)"), ...) + facet_wrap(~feature_label)
+      }
+    } else {
+      if (markers_linear) {
+        g <- ggplot(data = data_df, aes(x = data_dim_1, y = data_dim_2, size = (value * 0.1))) + 
+          facet_wrap(~feature_label)
+      } else {
+        g <- ggplot(data = data_df, aes(x = data_dim_1, y = data_dim_2, size = log10(value + 0.1))) + 
+          facet_wrap(~feature_label)
+      }
+    }
+  } else {
+    g <- ggplot(data = data_df, aes(x = data_dim_1, y = data_dim_2))
+  }
+  
+  if (show_tree) {
+    g <- g + geom_segment(aes(x = source_prin_graph_dim_1, 
+                              y = source_prin_graph_dim_2, 
+                              xend = target_prin_graph_dim_1, 
+                              yend = target_prin_graph_dim_2), 
+                          size = cell_link_size, linetype = "solid", na.rm = TRUE, data = edge_df)
+  }
+  
+  if (is.null(markers_exprs) == FALSE && nrow(markers_exprs) > 0) {
+    if (use_color_gradient) {
+    } else {
+      g <- g + geom_point(aes(color = .data[[color_by]]), na.rm = TRUE)
+    }
+  } else {
+    if (use_color_gradient) {
+    } else {
+      g <- g + geom_point(aes(color = .data[[color_by]]), size = I(cell_size), na.rm = TRUE)
+    }
+  }
+  
+  if (show_branch_points && cds@dim_reduce_type == "DDRTree") {
+    mst_branch_nodes <- cds@auxOrderingData[[cds@dim_reduce_type]]$branch_points
+    branch_point_df <- ica_space_df %>% 
+      dplyr::slice(match(mst_branch_nodes, sample_name)) %>% 
+      dplyr::mutate(branch_point_idx = seq_len(dplyr::n()))
+    
+    g <- g + geom_point(aes(x = prin_graph_dim_1, y = prin_graph_dim_2), 
+                        size = 5, na.rm = TRUE, data = branch_point_df) + 
+      geom_text(aes(x = prin_graph_dim_1, y = prin_graph_dim_2, label = branch_point_idx), 
+                size = 4, color = "white", na.rm = TRUE, data = branch_point_df)
+  }
+  
+  if (show_cell_names) {
+    g <- g + geom_text(aes(label = sample_name), size = cell_name_size)
+  }
+  if (show_state_number) {
+    g <- g + geom_text(aes(label = sample_state), size = state_number_size)
+  }
+  
+  # Fallback to standard ggplot2 theme to avoid missing private monocle functions
+  g <- g + theme_classic() + 
+    xlab(paste("Component", x)) + ylab(paste("Component", y)) + 
+    theme(legend.position = "top", legend.key.height = grid::unit(0.35, "in")) + 
+    theme(legend.key = element_blank()) + 
+    theme(panel.background = element_rect(fill = "white"))
+  
+  g
+}
+# =========================================================================
+
 # -- Paclitaxel Trajectory --
-png('./plots/pal_monocle_state.png', units = 'in', res = 300, width = 6, height = 6)
-plot_cell_trajectory(pal_cds, color_by = "State", cell_size = 3) + 
+png(paste0(fig_path, 'pal_monocle_state.png'), units = 'in', res = 300, width = 6, height = 6)
+plot_cell_trajectory_modern(pal_cds, color_by = "State", cell_size = 3) + 
   scale_color_manual(values = my_colors[1:5]) + 
   theme(text = element_text(size = 22), legend.text = element_text(size = 28))
 dev.off()
 
-png('./plots/pal_monocle_pseudotime.png', units = 'in', res = 300, width = 6, height = 6)
-plot_cell_trajectory(pal_cds, color_by = "Pseudotime", cell_size = 3) + 
+png(paste0(fig_path, 'pal_monocle_pseudotime.png'), units = 'in', res = 300, width = 6, height = 6)
+plot_cell_trajectory_modern(pal_cds, color_by = "Pseudotime", cell_size = 3) + 
   scale_color_gradient(high = my_colors[3], low = my_colors[2], breaks = c(0, 5, 10)) + 
   theme(text = element_text(size = 22))
 dev.off()
 
-png('./plots/pal_monocle_scdeal_prob.png', units = 'in', res = 300, width = 6, height = 6)
-plot_cell_trajectory(pal_cds, color_by = "scDEAL_pred", cell_size = 3) + 
+png(paste0(fig_path, 'pal_monocle_scdeal_prob.png'), units = 'in', res = 300, width = 6, height = 6)
+plot_cell_trajectory_modern(pal_cds, color_by = "scDEAL_pred", cell_size = 3) + 
   scale_color_gradient(high = 'tomato', low = 'skyblue', breaks = c(0, 0.5, 1), limits = c(0, 1), name = 'Sensitivity prob') + 
   theme(text = element_text(size = 22))
 dev.off()
 
 # -- Trametinib Trajectory --
-png('./plots/tram_monocle_state.png', units = 'in', res = 300, width = 6, height = 6)
-plot_cell_trajectory(tram_cds_subset, color_by = "State", cell_size = 3) + 
+png(paste0(fig_path, 'tram_monocle_state.png'), units = 'in', res = 300, width = 6, height = 6)
+plot_cell_trajectory_modern(tram_cds_subset, color_by = "State", cell_size = 3) + 
   scale_color_manual(values = my_colors[1:6]) + 
   theme(text = element_text(size = 22), legend.text = element_text(size = 28))
 dev.off()
 
-png('./plots/tram_monocle_pseudotime.png', units = 'in', res = 300, width = 6, height = 6)
-plot_cell_trajectory(tram_cds_subset, color_by = "Pseudotime", cell_size = 3) + 
+png(paste0(fig_path, 'tram_monocle_pseudotime.png'), units = 'in', res = 300, width = 6, height = 6)
+plot_cell_trajectory_modern(tram_cds_subset, color_by = "Pseudotime", cell_size = 3) + 
   scale_color_gradient(high = my_colors[3], low = my_colors[2], breaks = c(0, 5, 10)) + 
   theme(text = element_text(size = 22))
 dev.off()
 
-png('./plots/tram_monocle_scdeal_prob.png', units = 'in', res = 300, width = 6, height = 6)
-plot_cell_trajectory(tram_cds_subset, color_by = "scDEAL_pred", cell_size = 3) + 
+png(paste0(fig_path, 'tram_monocle_scdeal_prob.png'), units = 'in', res = 300, width = 6, height = 6)
+plot_cell_trajectory_modern(tram_cds_subset, color_by = "scDEAL_pred", cell_size = 3) + 
   scale_color_gradient(high = 'tomato', low = 'skyblue', breaks = c(0, 0.5, 1), limits = c(0, 1), name = 'Sensitivity prob') + 
   theme(text = element_text(size = 22))
 dev.off()
@@ -393,7 +552,6 @@ dev.off()
 cat("Generating ClusterGVis Heatmaps...\n")
 
 text_colors <- c("blue4", "red4", "darkgreen", "purple4", "darkorange3", "grey30")
-
 
 # ==============================================================================
 # IMPORTANT: PASTE YOUR FULL `my_visCluster` FUNCTION HERE
@@ -1289,7 +1447,7 @@ pal_clusterGVis_enrich <- bind_rows(
   pal_c3_filtered %>% head(5)
 )
 
-png('./plots/pal_monocle_clusterGVis_compact_text.png', units = 'in', res = 300, width = 12, height = 8)
+png(paste0(fig_path, 'pal_monocle_clusterGVis_compact_text.png'), units = 'in', res = 300, width = 12, height = 8)
 my_visCluster(object = pal_heatmap_res, plotType = "both", column_names_rot = 45, show_row_dend = FALSE,
               markGenes = pal_clusterGVis_gene, markGenesSide = "left", pseudotimeCol = c(my_colors[2], my_colors[3]),
               annoTermData = pal_clusterGVis_enrich, ctAnnoCol = text_colors[1:3], goCol = rep(text_colors[1:3], each = 5),
@@ -1311,7 +1469,7 @@ if(!"ratio" %in% colnames(tram_clusterGVis_enrich_data)){
   })
 }
 
-png('./plots/tram_monocle_clusterGVis_compact_text.png', units = 'in', res = 300, width = 12, height = 8)
+png(paste0(fig_path, 'tram_monocle_clusterGVis_compact_text.png'), units = 'in', res = 300, width = 12, height = 8)
 my_visCluster(object = tram_heatmap_res, plotType = "both", column_names_rot = 45, show_row_dend = FALSE,
               markGenes = tram_clusterGVis_gene, markGenesSide = "left", pseudotimeCol = c(my_colors[2], my_colors[3]),
               annoTermData = tram_clusterGVis_enrich, ctAnnoCol = text_colors[1:3], goCol = rep(text_colors[1:3], each = 5),

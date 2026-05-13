@@ -1,5 +1,5 @@
 # Please change the path here before you run the script.
-setwd('D:/scDrugPredict_benchmark/final_submission_files/new_files/codes/')
+setwd('./')
 
 library(Seurat)
 library(ggplot2)
@@ -7,9 +7,9 @@ library(dplyr)
 library(tidyr)
 library(tidytext)
 
-data_dir <- "./data" 
-fig_dir <- "./plots"
-dir.create(fig_dir, recursive = TRUE, showWarnings = FALSE)
+data_dir <- "../data" 
+fig_dir <- '../results/'
+# dir.create(fig_dir, recursive = TRUE, showWarnings = FALSE)
 
 my_colors <- c(
   "scDEAL"     = "#D55E00", 

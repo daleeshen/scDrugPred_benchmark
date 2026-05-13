@@ -1,5 +1,5 @@
 # Please change the path here before you run the script.
-setwd('D:/scDrugPredict_benchmark/final_submission_files/new_files/codes/')
+setwd('./')
 
 library(dplyr)
 library(tidyr)
@@ -14,8 +14,8 @@ library(gridExtra)
 # 1. Dataset preparation
 # ==============================================================================
 
-fig_path <- "plots/"
-if(!dir.exists(fig_path)) dir.create(fig_path)
+fig_path <- '../results/'
+# if(!dir.exists(fig_path)) dir.create(fig_path)
 
 color_ref <- c(
   "scDEAL"      = "#E7A673",
@@ -32,12 +32,12 @@ color_ref <- c(
 tool_order <- c("scDEAL", "CaDRReS-sc", "SCAD", "DREEP", "DrugFormer", "Precily", "scDr", "Beyondcell", "scIDUC")
 ratio_levels <- c("1:3", "1:10", "1:30", "1:100")
 
-merged_df <- read.csv("./data/unb_merged_performance_df.csv")
+merged_df <- read.csv("../data/unb_merged_performance_df.csv")
 merged_df$Ratio <- factor(merged_df$Ratio, levels = ratio_levels)
-balanced_rd <- read.csv("./data/bal_final_merged_data.csv")
-unb_stats_df <- read.csv("./data/unb_cell_counts.csv")
-gse108397_scores <- read.csv("./data/GSE108397_pred_scores.csv")
-gse163836_scores <- read.csv("./data/GSE163836_pred_scores.csv")
+balanced_rd <- read.csv("../data/bal_final_merged_data.csv")
+unb_stats_df <- read.csv("../data/unb_cell_counts.csv")
+gse108397_scores <- read.csv("../data/GSE108397_pred_scores.csv")
+gse163836_scores <- read.csv("../data/GSE163836_pred_scores.csv")
 
 
 # ==============================================================================
@@ -57,7 +57,7 @@ unb_stats_plot_df <- unb_stats_df %>%
   )
 
 # Clean dataset names
-unb_stats_plot_df$Dataset <- gsub("_DMSO_rm|_Vem", "", unb_stats_plot_df$Dataset)
+unb_stats_plot_df$Dataset <- gsub("_Vem", "", unb_stats_plot_df$Dataset)
 unb_stats_plot_df$Dataset <- gsub("_PacBlood", "_Blood", unb_stats_plot_df$Dataset)
 unb_stats_plot_df$Dataset <- gsub("_PacTissue", "_Tissue", unb_stats_plot_df$Dataset)
 
@@ -334,8 +334,13 @@ make_ratio_heatmap <- function(df, metric, ratio_value) {
   
   mat <- as.matrix(df_wide[, -1, drop = FALSE])
   rownames(mat) <- df_wide$Dataset
+
   
-  col_fun <- colorRamp2(c(0, 0.5, 1), c("blue", "white", "red"))
+  if (metric == "NormAUPRC") {
+    col_fun <- colorRamp2(c(-1, 0, 1), c("blue", "white", "red"))
+  } else {
+    col_fun <- colorRamp2(c(0, 0.5, 1), c("blue", "white", "red"))
+  }
   
   Heatmap(
     mat,
@@ -354,7 +359,7 @@ make_ratio_heatmap <- function(df, metric, ratio_value) {
   )
 }
 
-metrics <- c("F1", "Precision", "Recall")
+metrics <- c("F1", "Precision", "Recall", "AUROC", "NormAUPRC")
 heatmap_list <- list()
 
 for (metric in metrics) {
@@ -366,8 +371,8 @@ for (metric in metrics) {
 
 grob_list <- lapply(heatmap_list, function(ht) grid.grabExpr(draw(ht)))
 
-png(paste0(fig_path, 'unb_f1_recall_pr_per_ratio_heatmap.png'), units = 'in', res = 300, width = 22, height = 20)
-grid.arrange(grobs = grob_list, nrow = 3, ncol = 4)
+png(paste0(fig_path, 'unb_all_metrics_per_ratio_heatmap.png'), units = 'in', res = 300, width = 22, height = 33)
+grid.arrange(grobs = grob_list, nrow = 5, ncol = 4)
 dev.off()
 
 # ==============================================================================

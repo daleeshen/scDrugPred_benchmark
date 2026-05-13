@@ -1,5 +1,5 @@
 # Please change the path here before you run the script.
-setwd('D:/scDrugPredict_benchmark/final_submission_files/new_files/codes/')
+setwd('./')
 
 library(tidyverse)
 library(tidytext)
@@ -10,11 +10,13 @@ library(ggrain)
 
 my_colors <- c('#0DA8BB','#14A97A','#833839','#DC5805','#FF9AB3','#711C9A','#74FCD4','lightgrey','#046488')
 
+out_dir <- '../results/'
+
 # ==============================================================================
 # Part 1: Dataset Statistics Barplot
 # ==============================================================================
 # Note: Ensure your data files are placed in the './data/' directory
-df <- read.csv('./data/drmref_info_final.csv')
+df <- read.csv('../data/drmref_info_final.csv')
 
 # Clean and format data
 df <- df %>%
@@ -72,14 +74,14 @@ p_dataset_stats <- ggplot(df_counts, aes(x = reorder_within(level, count, featur
     strip.background = element_blank()
   )
 
-png('./plots/Dataset_stats_barplot.png', units = 'in', res = 300, width = 10, height = 10.5)
+png(paste0(out_dir, 'Dataset_stats_barplot.png'), units = 'in', res = 300, width = 10, height = 10.5)
 print(p_dataset_stats)
 dev.off()
 
 # ==============================================================================
 # Part 2: Cell Count Barplot
 # ==============================================================================
-cell_count_df <- read.csv('./data/cell_count.csv', header = TRUE) %>%
+cell_count_df <- read.csv('../data/cell_count.csv', header = TRUE) %>%
   mutate(Dataset = gsub('_DMSO_rm', '', Dataset))
 
 df_agg <- cell_count_df %>%
@@ -126,14 +128,14 @@ p_cell_count <- ggplot(df_agg, aes(x = Cell_Count, y = reorder(Label, Cell_Count
     legend.position = 'bottom'
   )
 
-png('./plots/cell_count_bar.png', units = 'in', res = 300, width = 10, height = 12)
+png(paste0(out_dir, 'cell_count_bar.png'), units = 'in', res = 300, width = 10, height = 12)
 print(p_cell_count)
 dev.off()
 
 # ==============================================================================
 # Part 3: Average Cosine Similarity & PCA
 # ==============================================================================
-avg_cos_df <- read.csv('./data/avg_cosine_similarity_SvsR.csv') %>%
+avg_cos_df <- read.csv('../data/avg_cosine_similarity_SvsR.csv') %>%
   left_join(df, by = 'Dataset') %>%
   mutate(Origin = ifelse(Tissue %in% c('BMA', 'Tumor tissue', 'PBMC'), 'Patient', 'Cell line'))
 
@@ -151,7 +153,7 @@ p_avg_cos <- ggplot(avg_cos_df, aes(x = Origin, y = Mean, fill = Origin)) +
   theme_classic() +
   theme(text = element_text(size = 20), legend.position = "right")
 
-png('./plots/avg_cos.png', units = 'in', res = 300, width = 5, height = 5)
+png(paste0(out_dir, 'avg_cos.png'), units = 'in', res = 300, width = 5, height = 5)
 print(p_avg_cos)
 dev.off()
 
@@ -174,14 +176,14 @@ p_avg_cos_pca <- ggplot(pca_df, aes(x = PC1, y = PC2, color = Tissue)) +
   theme_classic() +
   theme(text = element_text(size = 20))
 
-png('./plots/avg_cos_pca.png', units = 'in', res = 300, width = 5, height = 5)
+png(paste0(out_dir, 'avg_cos_pca.png'), units = 'in', res = 300, width = 5, height = 5)
 print(p_avg_cos_pca)
 dev.off()
 
 # ==============================================================================
 # Part 4: Lineage Tracing Benchmarking (Shuyu Data)
 # ==============================================================================
-meta_rd_ola <- read.csv('./data/meta_rd_ola.csv', row.names = 1)
+meta_rd_ola <- read.csv('../data/meta_rd_ola.csv', row.names = 1)
 
 # Plot 4: Stacked Barplot
 df_bar <- meta_rd_ola %>%
@@ -207,7 +209,7 @@ p_shuyu_stats <- ggplot(df_bar, aes(x = time_point, fill = drugSens)) +
     legend.title = element_blank()
   )
 
-png('./plots/shuyu_data_stacked_barplot.png', units = 'in', res = 300, width = 5, height = 6)
+png(paste0(out_dir, 'shuyu_data_stacked_barplot.png'), units = 'in', res = 300, width = 5, height = 6)
 print(p_shuyu_stats)
 dev.off()
 
@@ -218,8 +220,8 @@ cosine_sim <- function(x, y) {
   sum(x * y) / (sqrt(sum(x^2)) * sqrt(sum(y^2)))
 }
 
-emb <- readRDS('./data/ola_emb_matrix.rds')
-meta <- read.csv('./data/meta_rd_ola.csv', row.names = 1)
+emb <- readRDS('../data/ola_emb_matrix.rds')
+meta <- read.csv('../data/meta_rd_ola.csv', row.names = 1)
 sister_groups <- split(rownames(meta), meta$sisters)
 
 # Calculate similarity for sister pairs
@@ -262,6 +264,6 @@ p_sisters <- ggplot(df_sim, aes(x = type, y = similarity, fill = type)) +
   theme_classic() +
   theme(legend.position = "none", text = element_text(size = 24))
 
-png('./plots/sisters_compare.png', units = 'in', res = 300, width = 5, height = 6)
+png(paste0(out_dir, 'sisters_compare.png'), units = 'in', res = 300, width = 5, height = 6)
 print(p_sisters)
 dev.off()
