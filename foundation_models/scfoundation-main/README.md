@@ -1,4 +1,3 @@
-```markdown
 # scFoundation
 
 This directory contains the scripts used to run scFoundation for single-cell drug response prediction.
@@ -45,4 +44,4 @@ The final evaluation results are saved in:
 
     MODEL_ROOT/results/single_run_YYYYMMDD_HHMMSS/<dataset>.csv
     MODEL_ROOT/results/single_run_YYYYMMDD_HHMMSS/<dataset>_predictions.csv
-```
+
