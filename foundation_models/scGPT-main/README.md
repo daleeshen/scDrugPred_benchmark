@@ -1,4 +1,3 @@
-```markdown
 # scGPT
 
 This directory contains the scripts used to run scGPT for single-cell drug response prediction.
@@ -44,4 +43,4 @@ The main outputs are:
     MODEL_ROOT/results/single_run_YYYYMMDD_HHMMSS/<dataset>.csv
     MODEL_ROOT/results/single_run_YYYYMMDD_HHMMSS/<dataset>_predictions.csv
     MODEL_ROOT/logs/single_run_YYYYMMDD_HHMMSS/<dataset>.log
-```
+
