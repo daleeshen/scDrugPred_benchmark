@@ -1,0 +1,418 @@
+./
+├── analyses
+│   ├── label_substitution
+│   │   ├── label_substitution.R
+│   │   ├── README.md
+│   │   ├── replace_SCAD_fold_labels.py
+│   │   ├── scad.sh
+│   │   └── scdeal.sh
+│   ├── lineage_tracing
+│   │   ├── ReSisTrace
+│   │   │   ├── README.md
+│   │   │   └── ReSisTrace_analysis.R
+│   │   └── Watermelon
+│   │       ├── performance_pres_vs_prer.R
+│   │       ├── README.md
+│   │       └── watermelon_analysis.R
+│   ├── PDAC
+│   │   └── PDAC_analysis.R
+│   └── scDEAL_ablation
+│       ├── ablation_analysis.R
+│       └── README.md
+├── benchmark_construction
+│   ├── generate_balanced_datasets.R
+│   ├── generate_imbalanced_datasets.R
+│   └── README.md
+├── data
+│   ├── prepare_drugformer_example.R
+│   ├── prepare_precily_example.R
+│   ├── prepare_scdeal_example.R
+│   ├── prepare_tpm_example.R
+│   └── README.md
+├── evaluation
+│   ├── bal_data_process.R
+│   ├── dataset_drug_single.csv
+│   └── imb_data_process.R
+├── foundation_models
+│   ├── scfoundation-main
+│   │   ├── model
+│   │   │   ├── benchmarking_dataloader_EBD_auto.py
+│   │   │   ├── benchmarking_dataloader_EBD_cross.py
+│   │   │   ├── benchmarking_dataloader_EBD.py
+│   │   │   ├── benchmarking_dataloader_FT.py
+│   │   │   ├── benchmarking_main_EBD_auto.py
+│   │   │   ├── benchmarking_main_EBD_cross.py
+│   │   │   ├── benchmarking_main_EBD.py
+│   │   │   ├── benchmarking_main_FT.py
+│   │   │   ├── cross_dataset_batch_run
+│   │   │   ├── dataset_making.py
+│   │   │   ├── embeds
+│   │   │   ├── examples
+│   │   │   │   └── SCAD
+│   │   │   ├── get_ebd.py
+│   │   │   ├── labels
+│   │   │   ├── load.py
+│   │   │   ├── logs
+│   │   │   ├── models
+│   │   │   │   └── download.txt
+│   │   │   ├── OS_scRNA_gene_index.19264.tsv
+│   │   │   ├── output
+│   │   │   ├── pretrainmodels
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── mae_autobin.py
+│   │   │   │   ├── performer.py
+│   │   │   │   ├── __pycache__
+│   │   │   │   │   ├── __init__.cpython-310.pyc
+│   │   │   │   │   ├── __init__.cpython-38.pyc
+│   │   │   │   │   ├── mae_autobin.cpython-310.pyc
+│   │   │   │   │   ├── mae_autobin.cpython-38.pyc
+│   │   │   │   │   ├── performer.cpython-310.pyc
+│   │   │   │   │   ├── performer.cpython-38.pyc
+│   │   │   │   │   ├── reversible.cpython-310.pyc
+│   │   │   │   │   ├── reversible.cpython-38.pyc
+│   │   │   │   │   ├── select_model.cpython-310.pyc
+│   │   │   │   │   ├── select_model.cpython-38.pyc
+│   │   │   │   │   ├── transformer.cpython-310.pyc
+│   │   │   │   │   └── transformer.cpython-38.pyc
+│   │   │   │   ├── pytorchTransformer.py
+│   │   │   │   ├── reversible.py
+│   │   │   │   ├── select_model.py
+│   │   │   │   └── transformer.py
+│   │   │   ├── README.md
+│   │   │   ├── run_scfoundation_batch
+│   │   │   ├── run_single_example.sh
+│   │   │   ├── samples
+│   │   │   ├── scdata
+│   │   │   │   └── GSE108397.txt
+│   │   │   ├── scfoundation_batch.lock
+│   │   │   ├── tool.py
+│   │   │   ├── training_hyperparameter.txt
+│   │   │   └── ufrc_run.sh
+│   │   ├── OS_scRNA_gene_index.19264.tsv
+│   │   ├── README.md
+│   │   └── SCAD
+│   │       ├── data
+│   │       │   ├── original
+│   │       │   │   └── download_links.txt
+│   │       │   ├── original_norm
+│   │       │   │   └── download_links.txt
+│   │       │   ├── processing
+│   │       │   │   ├── HGNC_symbol_all_genes.tsv
+│   │       │   │   └── preprocessing_GDSC_all_drug_logIC50_binary_intersect.py
+│   │       │   ├── response
+│   │       │   │   └── download_links.txt
+│   │       │   └── split_norm
+│   │       │       ├── download_links.txt
+│   │       │       └── split_data_SCAD_5fold_norm.py
+│   │       ├── model
+│   │       │   ├── SCADmodules.py
+│   │       │   └── SCAD_train_binarized_5folds-pub.py
+│   │       ├── plot-publish.ipynb
+│   │       ├── README.md
+│   │       ├── results
+│   │       ├── run_embedding_bulk.py
+│   │       ├── run_embedding_sc.py
+│   │       └── run.sh
+│   └── scGPT-main
+│       ├── data
+│       ├── docs
+│       │   ├── conf.py
+│       │   ├── environment.yml
+│       │   ├── faq.rst
+│       │   ├── index.rst
+│       │   ├── installation.rst
+│       │   ├── introduction.rst
+│       │   ├── make.bat
+│       │   ├── Makefile
+│       │   ├── references.rst
+│       │   ├── requirements.txt
+│       │   ├── scgpt.model.rst
+│       │   ├── scgpt.rst
+│       │   ├── scgpt.scbank.rst
+│       │   ├── scgpt.tasks.rst
+│       │   ├── scgpt.tokenizer.rst
+│       │   ├── scgpt.utils.rst
+│       │   ├── tutorial_annotation.nblink
+│       │   ├── tutorial_grn.nblink
+│       │   ├── tutorial_integraion.nblink
+│       │   ├── tutorial_perturbation.nblink
+│       │   └── tutorial_reference_mapping.nblink
+│       ├── environment.yml
+│       ├── examples
+│       │   └── finetune_integration.py
+│       ├── LICENSE
+│       ├── poetry.lock
+│       ├── pyproject.toml
+│       ├── README.md
+│       ├── scdata
+│       │   ├── data_generation.R
+│       │   └── GSE108397.txt
+│       ├── scgpt
+│       │   ├── data_collator
+│       │   │   ├── data_collator.py
+│       │   │   ├── data_sampler.py
+│       │   │   ├── __init__.py
+│       │   │   ├── loss.py
+│       │   │   ├── preprocess.py
+│       │   │   └── trainer.py
+│       │   ├── data_collator.py
+│       │   ├── data_sampler.py
+│       │   ├── __init__.py
+│       │   ├── logs
+│       │   ├── loss.py
+│       │   ├── model
+│       │   │   ├── dsbn.py
+│       │   │   ├── generation_model.py
+│       │   │   ├── grad_reverse.py
+│       │   │   ├── __init__.py
+│       │   │   ├── model.py
+│       │   │   ├── multiomic_model.py
+│       │   │   └── __pycache__
+│       │   │       ├── dsbn.cpython-310.pyc
+│       │   │       ├── generation_model.cpython-310.pyc
+│       │   │       ├── grad_reverse.cpython-310.pyc
+│       │   │       ├── __init__.cpython-310.pyc
+│       │   │       ├── model.cpython-310.pyc
+│       │   │       └── multiomic_model.cpython-310.pyc
+│       │   ├── preprocess.py
+│       │   ├── samples
+│       │   ├── save
+│       │   │   └── download.txt
+│       │   ├── scbank
+│       │   │   ├── databank.py
+│       │   │   ├── data.py
+│       │   │   ├── __init__.py
+│       │   │   ├── monitor.py
+│       │   │   ├── __pycache__
+│       │   │   │   ├── databank.cpython-310.pyc
+│       │   │   │   ├── data.cpython-310.pyc
+│       │   │   │   ├── __init__.cpython-310.pyc
+│       │   │   │   └── setting.cpython-310.pyc
+│       │   │   └── setting.py
+│       │   ├── tasks
+│       │   │   ├── benchmarking_dataloader_EBD_auto.py
+│       │   │   ├── benchmarking_dataloader_EBD_cross.py
+│       │   │   ├── benchmarking_dataloader_EBD.py
+│       │   │   ├── benchmarking_dataloader_FT.py
+│       │   │   ├── benchmarking_main_EBD.py
+│       │   │   ├── benchmarking_main_FT.py
+│       │   │   ├── data_collator_EBD.py
+│       │   │   ├── data_collator_FT.py
+│       │   │   ├── get_ebd.py
+│       │   │   ├── __init__.py
+│       │   │   ├── model
+│       │   │   │   ├── dsbn.py
+│       │   │   │   ├── generation_model.py
+│       │   │   │   ├── grad_reverse.py
+│       │   │   │   ├── __init__.py
+│       │   │   │   ├── model.py
+│       │   │   │   ├── multiomic_model.py
+│       │   │   │   └── __pycache__
+│       │   │   │       ├── dsbn.cpython-310.pyc
+│       │   │   │       ├── dsbn.cpython-38.pyc
+│       │   │   │       ├── generation_model.cpython-310.pyc
+│       │   │   │       ├── generation_model.cpython-38.pyc
+│       │   │   │       ├── grad_reverse.cpython-310.pyc
+│       │   │   │       ├── grad_reverse.cpython-38.pyc
+│       │   │   │       ├── __init__.cpython-310.pyc
+│       │   │   │       ├── __init__.cpython-38.pyc
+│       │   │   │       ├── model.cpython-310.pyc
+│       │   │   │       ├── model.cpython-38.pyc
+│       │   │   │       ├── multiomic_model.cpython-310.pyc
+│       │   │   │       └── multiomic_model.cpython-38.pyc
+│       │   │   ├── output
+│       │   │   │   ├── download.txt
+│       │   │   │   ├── metrics
+│       │   │   │   │   └── 1fold.csv
+│       │   │   │   ├── model_save
+│       │   │   │   └── testset_records.pkl
+│       │   │   ├── preprocess.py
+│       │   │   ├── __pycache__
+│       │   │   │   ├── benchmarking_dataloader_EBD_auto.cpython-310.pyc
+│       │   │   │   ├── benchmarking_dataloader_EBD.cpython-310.pyc
+│       │   │   │   ├── benchmarking_dataloader_EBD.cpython-38.pyc
+│       │   │   │   ├── benchmarking_dataloader_EBD_cross.cpython-310.pyc
+│       │   │   │   ├── benchmarking_dataloader_FT.cpython-38.pyc
+│       │   │   │   ├── benchmarking_dataloader_FT_study.cpython-38.pyc
+│       │   │   │   ├── benchmarking_dataloaderV2.cpython-38.pyc
+│       │   │   │   ├── benchmarking_dtloader_fintuning.cpython-310.pyc
+│       │   │   │   ├── benchmarking_dtloader_fintuning.cpython-38.pyc
+│       │   │   │   ├── data_collator.cpython-310.pyc
+│       │   │   │   ├── data_collator.cpython-38.pyc
+│       │   │   │   ├── data_collator_EBD.cpython-310.pyc
+│       │   │   │   ├── data_collator_EBD.cpython-38.pyc
+│       │   │   │   ├── data_collator_FT.cpython-38.pyc
+│       │   │   │   ├── __init__.cpython-310.pyc
+│       │   │   │   ├── preprocess.cpython-310.pyc
+│       │   │   │   ├── preprocess.cpython-38.pyc
+│       │   │   │   ├── tool.cpython-310.pyc
+│       │   │   │   └── tool.cpython-38.pyc
+│       │   │   ├── run_lineage_tracing.sh
+│       │   │   ├── run_single_example.sh
+│       │   │   ├── scbank
+│       │   │   │   ├── databank.py
+│       │   │   │   ├── data.py
+│       │   │   │   ├── __init__.py
+│       │   │   │   ├── monitor.py
+│       │   │   │   └── setting.py
+│       │   │   ├── stp1_get_ebd_auto.py
+│       │   │   ├── stp2_benchmarking_main_EBD_auto.py
+│       │   │   ├── stp3_benchmarking_main_EBD_cross.py
+│       │   │   ├── tokenizer
+│       │   │   │   ├── default_census_vocab.json
+│       │   │   │   ├── default_gene_vocab.json
+│       │   │   │   ├── gene_tokenizer.py
+│       │   │   │   ├── __init__.py
+│       │   │   │   └── __pycache__
+│       │   │   │       ├── gene_tokenizer.cpython-310.pyc
+│       │   │   │       ├── gene_tokenizer.cpython-38.pyc
+│       │   │   │       ├── __init__.cpython-310.pyc
+│       │   │   │       └── __init__.cpython-38.pyc
+│       │   │   ├── tool.py
+│       │   │   └── utils
+│       │   │       ├── __init__.py
+│       │   │       ├── __pycache__
+│       │   │       │   ├── __init__.cpython-310.pyc
+│       │   │       │   ├── __init__.cpython-38.pyc
+│       │   │       │   ├── util.cpython-310.pyc
+│       │   │       │   └── util.cpython-38.pyc
+│       │   │       └── util.py
+│       │   ├── tokenizer
+│       │   │   ├── default_census_vocab.json
+│       │   │   ├── default_gene_vocab.json
+│       │   │   ├── gene_tokenizer.py
+│       │   │   ├── __init__.py
+│       │   │   └── __pycache__
+│       │   │       ├── gene_tokenizer.cpython-310.pyc
+│       │   │       └── __init__.cpython-310.pyc
+│       │   ├── trainer.py
+│       │   └── utils
+│       │       ├── __init__.py
+│       │       ├── __pycache__
+│       │       │   ├── __init__.cpython-310.pyc
+│       │       │   └── util.cpython-310.pyc
+│       │       └── util.py
+│       └── tests
+│           ├── __init__.py
+│           ├── test_sampler.py
+│           ├── test_scbank.py
+│           ├── test_scformer.py
+│           ├── test_tokenizer.py
+│           └── vocab.json
+├── methods
+│   ├── Beyondcell
+│   │   ├── beyondcell_environment.yml
+│   │   ├── Dockerfile
+│   │   ├── README.md
+│   │   ├── run_beyondcell_example.sh
+│   │   └── run_beyondcell.R
+│   ├── CaDRReS-sc
+│   │   ├── CaDRReS-sc
+│   │   │   ├── auto_script.py
+│   │   │   └── model_training.py
+│   │   ├── README.md
+│   │   └── run_cadrres_example.sh
+│   ├── DREEP
+│   │   ├── README.md
+│   │   ├── run_dreep_example.sh
+│   │   └── run_dreep.R
+│   ├── DrugFormer
+│   │   ├── DrugFormer
+│   │   │   ├── dataloader.py
+│   │   │   ├── Dataset_auto.py
+│   │   │   ├── dataset_drug_single.csv
+│   │   │   ├── dataset.py
+│   │   │   ├── dictionary_genename_token_pair.pickle
+│   │   │   ├── environment.yaml
+│   │   │   ├── exp.py
+│   │   │   ├── Gdata.pickle
+│   │   │   ├── gene_graph.py
+│   │   │   ├── main_auto.py
+│   │   │   ├── main.py
+│   │   │   ├── model.py
+│   │   │   ├── newdt.py
+│   │   │   ├── requirements.txt
+│   │   │   ├── token_gene_dictionary.pickle
+│   │   │   └── tool.py
+│   │   ├── README.md
+│   │   └── run_drugformer_example.sh
+│   ├── Precily
+│   │   ├── README.md
+│   │   ├── run_precily_example.sh
+│   │   └── run_precily.R
+│   ├── SCAD
+│   │   ├── README.md
+│   │   ├── run_scad_example.sh
+│   │   └── SCAD
+│   │       ├── best_param_extractor.py
+│   │       ├── model
+│   │       │   ├── baseline
+│   │       │   │   ├── SCAD_train_binarized_5folds_baseline.py
+│   │       │   │   └── weight_all_baseline_hypers.xlsx
+│   │       │   ├── newFig5_SCAD_train_weight_fixed_params.py
+│   │       │   ├── plot_tsne.py
+│   │       │   ├── __pycache__
+│   │       │   │   ├── SCADmodules.cpython-310.pyc
+│   │       │   │   ├── SCADmodules.cpython-312.pyc
+│   │       │   │   └── SCADmodules.cpython-37.pyc
+│   │       │   ├── readme.txt
+│   │       │   ├── run_scad_adaptation.py
+│   │       │   ├── SCAD_5foldsCV_on_source_arg_auto.py
+│   │       │   ├── SCAD_5foldsCV_on_source_arg.py
+│   │       │   ├── SCAD_5foldsCV_on_source_arg_smote_auto.py
+│   │       │   ├── SCAD_5foldsCV_on_source_arg_smote.py
+│   │       │   ├── SCADmodules.py
+│   │       │   ├── SCAD_sensitivity_sorting_allcells_5folds.py
+│   │       │   ├── SCAD_sensitivity_sorting_allcells_5folds_smote.py
+│   │       │   ├── SCAD_train_binarized_5folds_auto.py
+│   │       │   ├── SCAD_train_binarized_5folds_manual.py
+│   │       │   ├── SCAD_train_binarized_5folds.py
+│   │       │   ├── SCAD_train_binarized_5folds_smote_auto.py
+│   │       │   ├── SCAD_train_binarized_smote_5folds_manual.py
+│   │       │   └── SCAD_train_binarized_smote_5folds.py
+│   │       ├── preprocess_GSE_drugs_norm.py
+│   │       ├── res_extract_smote.py
+│   │       ├── res_extract_weight.py
+│   │       ├── Scanpy_data_preprocess_auto.py
+│   │       └── Scanpy_data_preprocess.py
+│   ├── scDEAL
+│   │   ├── README.md
+│   │   ├── run_scdeal_example.sh
+│   │   └── scDEAL
+│   │       ├── bulkmodel.py
+│   │       ├── DaNN
+│   │       │   ├── loss.py
+│   │       │   ├── mmd.py
+│   │       │   └── __pycache__
+│   │       │       ├── mmd.cpython-312.pyc
+│   │       │       └── mmd.cpython-37.pyc
+│   │       ├── models.py
+│   │       ├── run_ablation.sh
+│   │       ├── sampling.py
+│   │       ├── scanpypip
+│   │       │   ├── compability.py
+│   │       │   ├── preprocessing.py
+│   │       │   ├── __pycache__
+│   │       │   │   ├── preprocessing.cpython-312.pyc
+│   │       │   │   ├── preprocessing.cpython-37.pyc
+│   │       │   │   ├── utils.cpython-312.pyc
+│   │       │   │   └── utils.cpython-37.pyc
+│   │       │   ├── trajectory.py
+│   │       │   └── utils.py
+│   │       ├── scmodel_auto.py
+│   │       ├── scmodel.py
+│   │       ├── trainers.py
+│   │       ├── trajectory.py
+│   │       └── utils.py
+│   ├── scDr
+│   │   ├── README.md
+│   │   ├── run_scdr_example.sh
+│   │   ├── run_scDr.R
+│   │   └── scDr
+│   │       ├── drug_down_signature.RDS
+│   │       └── drug_up_signature.RDS
+│   └── scIDUC
+│       └── README.md
+└── scDrugBenchmark_github_structure.txt
+
+87 directories, 329 files

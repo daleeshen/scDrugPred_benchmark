@@ -1,0 +1,27 @@
+Dataset,drug,disease,TCGA_ID,GDSC_ID
+GSE104987,KDM5-C70,Breast cancer,BRCA,NA
+GSE108397,PLX-4720,Melanoma,SKCM,1036
+GSE111014,Ibrutinib,Chronic lymphocytic leukemia,CLL,NA
+GSE115251,TAE684,Neuroblastoma,NB,35
+GSE131984_JQ1_DMSO_rm,JQ1,Breast cancer,BRCA,163
+GSE131984_Pac_DMSO_rm,Paclitaxel,Breast cancer,BRCA,11
+GSE131984_Pal_DMSO_rm,Palbociclib,Breast cancer,BRCA,1054
+GSE139386,Ceritinib,Lung cancer,LUAD,NA
+GSE140440,Docetaxel,Prostate cancer,PRAD,1007
+GSE149214,Erlotinib,Lung cancer,LUAD,1
+GSE152469,Ibrutinib,Chronic lymphocytic leukemia,CLL,NA
+GSE153697,anti-CD19 CAR-T,Acute lymphoblastic leukemia,ALL,NA
+GSE158457,Dasatinib,Acute lymphoblastic leukemia,ALL,51
+GSE162117,Ficlatuzumab,Acute myeloid leukemia,LAML,NA
+GSE163836,Paclitaxel,Breast cancer,BRCA,11
+GSE164237,Pembrolizumab,Melanoma,SKCM,NA
+GSE164551,CAR-T,Multiple myeloma,MM,NA
+GSE164897_Vem,Vemurafenib,Melanoma,SKCM,NA
+GSE168668,Enzalutamide,Prostate cancer,PRAD,NA
+GSE169246_PacBlood,Paclitaxel,Breast cancer,BRCA,11
+GSE169246_PacTissue,Paclitaxel,Breast cancer,BRCA,11
+GSE175716,Sorafenib,Liver cancer,LIHC,30
+GSE186960,Gemcitabine,Pancreatic cancer,PAAD,135
+GSE199333,Gilteritinib,Acute myeloid leukemia,LAML,NA
+GSE212217,Pembrolizumab,Endometrial cancer,UCEC,NA
+PMID34715028,Nivolumab,Kidney cancer,KIRC,NA

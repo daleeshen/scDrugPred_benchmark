@@ -1,0 +1,27 @@
+Dataset,drug
+GSE104987,KDM5-C70
+GSE108397,PLX-4720
+GSE111014,ibrutinib
+GSE115251,TAE684
+GSE131984_JQ1_DMSO_rm,JQ1
+GSE131984_Pac_DMSO_rm,paclitaxel
+GSE131984_Pal_DMSO_rm,palbociclib
+GSE139386,ceritinib
+GSE140440,docetaxel
+GSE149214,erlotinib
+GSE152469,ibrutinib
+GSE153697,anti-CD19 CAR-T
+GSE158457,dasatinib
+GSE162117,ficlatuzumab
+GSE163836,paclitaxel
+GSE164237,pembrolizumab
+GSE164551,CAR-T
+GSE164897_Vem,vemurafenib
+GSE168668,enzalutamide
+GSE169246_PacBlood,paclitaxel
+GSE169246_PacTissue,paclitaxel
+GSE175716,sorafenib
+GSE186960,gemcitabine
+GSE199333,gilteritinib
+GSE212217,pembrolizumab
+PMID34715028,nivolumab

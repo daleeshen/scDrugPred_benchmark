@@ -1,0 +1,311 @@
+#!/usr/bin/env bash
+
+# Batch pipeline for scFoundation:
+#   1. dataset_making.py
+#   2. get_ebd.py
+#   3. benchmarking_main_EBD_auto.py
+#
+# Output directories mirror the relative structure under scdata/.
+
+set -uo pipefail
+
+MODEL_ROOT="/home/ubuntu/lishen/scFoundation-main/model"
+SCDATA_ROOT="${MODEL_ROOT}/scdata"
+
+DATASET_SCRIPT="${MODEL_ROOT}/dataset_making.py"
+EMBED_SCRIPT="${MODEL_ROOT}/get_ebd.py"
+BENCHMARK_SCRIPT="${MODEL_ROOT}/benchmarking_main_EBD_auto.py"
+
+GENE_INDEX="${MODEL_ROOT}/OS_scRNA_gene_index.19264.tsv"
+MODEL_CKPT="${MODEL_ROOT}/models/models.ckpt"
+
+SAMPLES_ROOT="${MODEL_ROOT}/samples"
+LABELS_ROOT="${MODEL_ROOT}/labels"
+EMBEDS_ROOT="${MODEL_ROOT}/embeds"
+RESULTS_ROOT="${MODEL_ROOT}/results"
+LOGS_ROOT="${MODEL_ROOT}/logs"
+
+PYTHON_BIN="${PYTHON_BIN:-python}"
+N_SPLITS="${N_SPLITS:-3}"
+OVERWRITE="${OVERWRITE:-0}"
+
+# An optional first argument limits the scan to one subtree or one TXT file.
+# Examples:
+#   bash run_scfoundation_batch.sh
+#   bash run_scfoundation_batch.sh "${SCDATA_ROOT}/balanced"
+#   bash run_scfoundation_batch.sh "${SCDATA_ROOT}/balanced/500/1/GSE108397.txt"
+SCAN_ROOT="${1:-${SCDATA_ROOT}}"
+
+RUN_ID="$(date '+%Y%m%d_%H%M%S')"
+SUMMARY_FILE="${LOGS_ROOT}/batch_summary_${RUN_ID}.tsv"
+LOCK_FILE="${MODEL_ROOT}/scfoundation_batch.lock"
+
+if ! mkdir -p \
+    "${SAMPLES_ROOT}" \
+    "${LABELS_ROOT}" \
+    "${EMBEDS_ROOT}" \
+    "${RESULTS_ROOT}" \
+    "${LOGS_ROOT}"
+then
+    echo "Failed to create output directories under: ${MODEL_ROOT}"
+    exit 1
+fi
+
+exec 9>"${LOCK_FILE}"
+if ! flock -n 9; then
+    echo "Another scFoundation batch process is already running."
+    exit 1
+fi
+
+for required_path in \
+    "${DATASET_SCRIPT}" \
+    "${EMBED_SCRIPT}" \
+    "${BENCHMARK_SCRIPT}" \
+    "${GENE_INDEX}" \
+    "${MODEL_CKPT}" \
+    "${SCDATA_ROOT}"
+do
+    if [[ ! -e "${required_path}" ]]; then
+        echo "Required path not found: ${required_path}"
+        exit 1
+    fi
+done
+
+if [[ ! -e "${SCAN_ROOT}" ]]; then
+    echo "Scan path not found: ${SCAN_ROOT}"
+    exit 1
+fi
+
+case "${SCAN_ROOT}" in
+    "${SCDATA_ROOT}"|"${SCDATA_ROOT}"/*)
+        ;;
+    *)
+        echo "Scan path must be inside: ${SCDATA_ROOT}"
+        exit 1
+        ;;
+esac
+
+if ! cd "${MODEL_ROOT}"; then
+    echo "Cannot enter model directory: ${MODEL_ROOT}"
+    exit 1
+fi
+
+printf 'timestamp\tdataset\tstatus\tlog_file\n' > "${SUMMARY_FILE}"
+
+run_one_dataset() {
+    local input_file="$1"
+    local relative_path="$2"
+    local relative_dir="$3"
+    local stem="$4"
+
+    local sample_dir="${SAMPLES_ROOT}/${relative_dir}"
+    local label_dir="${LABELS_ROOT}/${relative_dir}"
+    local embed_dir="${EMBEDS_ROOT}/${relative_dir}"
+    local result_dir="${RESULTS_ROOT}/${relative_dir}"
+
+    local sample_output="${sample_dir}/${stem}_samples.pkl"
+    local label_output="${label_dir}/${stem}_labels.npy"
+    local embed_output="${embed_dir}/${stem}_embeds.npy"
+    local metrics_output="${result_dir}/${stem}.csv"
+    local predictions_output="${result_dir}/${stem}_predictions.csv"
+
+    local marker
+    local expected_cells
+    local prediction_cells
+
+    if ! mkdir -p \
+        "${sample_dir}" \
+        "${label_dir}" \
+        "${embed_dir}" \
+        "${result_dir}"
+    then
+        echo "ERROR: failed to create mirrored output directories"
+        return 1
+    fi
+
+    echo "============================================================"
+    echo "Dataset: ${relative_path}"
+    echo "Started: $(date '+%F %T')"
+    echo "============================================================"
+
+    echo "[1/3] Running dataset_making.py"
+    marker="$(mktemp)"
+
+    if ! "${PYTHON_BIN}" "${DATASET_SCRIPT}" \
+        --data_path "${input_file}" \
+        --gene_index "${GENE_INDEX}" \
+        --model_path "${MODEL_CKPT}" \
+        --sample_output "${sample_output}" \
+        --label_output "${label_output}"
+    then
+        rm -f -- "${marker}"
+        echo "ERROR: dataset_making.py failed"
+        return 1
+    fi
+
+    if [[ ! -f "${sample_output}" || ! "${sample_output}" -nt "${marker}" ]]; then
+        rm -f -- "${marker}"
+        echo "ERROR: new sample output was not created: ${sample_output}"
+        return 1
+    fi
+
+    if [[ ! -f "${label_output}" || ! "${label_output}" -nt "${marker}" ]]; then
+        rm -f -- "${marker}"
+        echo "ERROR: new label output was not created: ${label_output}"
+        return 1
+    fi
+
+    rm -f -- "${marker}"
+
+    echo "Sample output: ${sample_output}"
+    echo "Label output : ${label_output}"
+
+    echo "[2/3] Running get_ebd.py"
+    marker="$(mktemp)"
+
+    if ! "${PYTHON_BIN}" "${EMBED_SCRIPT}" \
+        --data_path "${input_file}" \
+        --gene_index "${GENE_INDEX}" \
+        --model_path "${MODEL_CKPT}" \
+        --output_file "${embed_output}"
+    then
+        rm -f -- "${marker}"
+        echo "ERROR: get_ebd.py failed"
+        return 1
+    fi
+
+    if [[ ! -f "${embed_output}" || ! "${embed_output}" -nt "${marker}" ]]; then
+        rm -f -- "${marker}"
+        echo "ERROR: new embedding output was not created: ${embed_output}"
+        return 1
+    fi
+
+    rm -f -- "${marker}"
+
+    echo "Embedding output: ${embed_output}"
+
+    echo "[3/3] Running benchmarking_main_EBD_auto.py"
+
+    if ! "${PYTHON_BIN}" "${BENCHMARK_SCRIPT}" \
+        --data_file "${embed_output}" \
+        --label_file "${label_output}" \
+        --input_file "${input_file}" \
+        --n_splits "${N_SPLITS}" \
+        --output_file "${metrics_output}"
+    then
+        echo "ERROR: benchmarking_main_EBD_auto.py failed"
+        return 1
+    fi
+
+    if [[ ! -s "${metrics_output}" ]]; then
+        echo "ERROR: metrics file was not created: ${metrics_output}"
+        return 1
+    fi
+
+    if [[ ! -s "${predictions_output}" ]]; then
+        echo "ERROR: predictions file was not created: ${predictions_output}"
+        return 1
+    fi
+
+    expected_cells="$(awk 'END {print NR - 1}' "${input_file}")"
+    prediction_cells="$(awk 'END {print NR - 1}' "${predictions_output}")"
+
+    if [[ "${prediction_cells}" -ne "${expected_cells}" ]]; then
+        echo "ERROR: prediction row count does not match input cell count"
+        echo "Input cells     : ${expected_cells}"
+        echo "Prediction rows : ${prediction_cells}"
+        return 1
+    fi
+
+    echo "Metrics output    : ${metrics_output}"
+    echo "Predictions output: ${predictions_output}"
+    echo "Prediction rows   : ${prediction_cells}"
+    echo "Completed: $(date '+%F %T')"
+
+    return 0
+}
+
+mapfile -d '' input_files < <(
+    find "${SCAN_ROOT}" -type f -name '*.txt' -print0 | sort -z
+)
+
+total_count="${#input_files[@]}"
+success_count=0
+failed_count=0
+skipped_count=0
+current_count=0
+
+if [[ "${total_count}" -eq 0 ]]; then
+    echo "No TXT files found under: ${SCAN_ROOT}"
+    exit 1
+fi
+
+echo "Found ${total_count} TXT files under ${SCAN_ROOT}"
+echo "Summary file: ${SUMMARY_FILE}"
+
+for input_file in "${input_files[@]}"
+do
+    current_count=$((current_count + 1))
+
+    relative_path="${input_file#"${SCDATA_ROOT}/"}"
+    relative_dir="$(dirname "${relative_path}")"
+    stem="$(basename "${input_file}" .txt)"
+
+    log_dir="${LOGS_ROOT}/${relative_dir}"
+    log_file="${log_dir}/${stem}_${RUN_ID}.log"
+    metrics_output="${RESULTS_ROOT}/${relative_dir}/${stem}.csv"
+    predictions_output="${RESULTS_ROOT}/${relative_dir}/${stem}_predictions.csv"
+
+    mkdir -p "${log_dir}"
+
+    echo
+    echo "[${current_count}/${total_count}] ${relative_path}"
+
+    if [[ "${OVERWRITE}" != "1" \
+          && -s "${metrics_output}" \
+          && -s "${predictions_output}" ]]
+    then
+        echo "SKIPPED: completed result already exists" | tee "${log_file}"
+        printf '%s\t%s\tSKIPPED\t%s\n' \
+            "$(date '+%F %T')" \
+            "${relative_path}" \
+            "${log_file}" >> "${SUMMARY_FILE}"
+        skipped_count=$((skipped_count + 1))
+        continue
+    fi
+
+    if run_one_dataset \
+        "${input_file}" \
+        "${relative_path}" \
+        "${relative_dir}" \
+        "${stem}" 2>&1 | tee "${log_file}"
+    then
+        printf '%s\t%s\tSUCCESS\t%s\n' \
+            "$(date '+%F %T')" \
+            "${relative_path}" \
+            "${log_file}" >> "${SUMMARY_FILE}"
+        success_count=$((success_count + 1))
+    else
+        printf '%s\t%s\tFAILED\t%s\n' \
+            "$(date '+%F %T')" \
+            "${relative_path}" \
+            "${log_file}" >> "${SUMMARY_FILE}"
+        failed_count=$((failed_count + 1))
+    fi
+done
+
+echo
+echo "============================================================"
+echo "Batch finished"
+echo "Total   : ${total_count}"
+echo "Success : ${success_count}"
+echo "Skipped : ${skipped_count}"
+echo "Failed  : ${failed_count}"
+echo "Summary : ${SUMMARY_FILE}"
+echo "============================================================"
+
+if [[ "${failed_count}" -gt 0 ]]; then
+    exit 1
+fi
+
+exit 0

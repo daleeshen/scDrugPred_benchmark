@@ -1,0 +1,117 @@
+# scDEAL
+
+This directory contains the scripts used to run scDEAL in the benchmark.
+
+## Required scDEAL Files
+
+The `data/` and `scDEALenv/` directories required by scDEAL are provided separately through the `scDrugBenchmark_env` archive because of their large size.
+
+Download `scDrugBenchmark_env` from Zenodo:
+
+**Zenodo:** [ ]
+
+After extraction, locate:
+
+```text
+scDrugBenchmark_env/
+└── scDEAL/
+    └── scDEAL/
+        ├── data/
+        └── scDEALenv/
+```
+
+Copy both directories into the corresponding scDEAL directory in the GitHub repository:
+
+```bash
+cp -r scDrugBenchmark_env/scDEAL/scDEAL/data \
+      scDrugBenchmark_github/methods/scDEAL/scDEAL/
+
+cp -r scDrugBenchmark_env/scDEAL/scDEAL/scDEALenv \
+      scDrugBenchmark_github/methods/scDEAL/scDEAL/
+```
+
+After copying, the directory should contain:
+
+```text
+scDrugBenchmark_github/
+└── methods/
+    └── scDEAL/
+        └── scDEAL/
+            ├── data/
+            ├── scDEALenv/
+            └── [benchmark-related scDEAL source files]
+```
+
+This step must be completed before setting up the Docker environment and running scDEAL.
+
+## Prepare Example Inputs
+
+scDEAL uses raw count matrices and metadata files as input.
+
+From the `data/` directory of the GitHub repository, run:
+
+```bash
+Rscript prepare_scdeal_example.R
+```
+
+The prepared inputs are saved under:
+
+```text
+data/example/
+├── balanced_1000/scdeal_input/
+├── imbalanced_1_3/scdeal_input/
+└── imbalanced_1_30/scdeal_input/
+```
+
+## Docker Environment
+
+scDEAL uses the shared Python Docker environment in:
+
+```text
+methods/shared_main_env/
+```
+
+Build the image from `methods/shared_main_env/`:
+
+```bash
+sudo docker build -t scdrugbenchmark-main .
+```
+
+Start the container from the root directory of the `scDrugBenchmark_github` repository:
+
+```bash
+sudo docker run --rm -it \
+-v "$(pwd)":/workspace \
+scdrugbenchmark-main
+```
+
+Inside the container, navigate to scDEAL:
+
+```bash
+cd /workspace/methods/scDEAL
+```
+
+Then follow the commands in the Run section below.
+
+## Run the Example
+
+From the `methods/scDEAL/` directory, run:
+
+```bash
+PYTHON_EXEC=/path/to/python ./run_scdeal_example.sh
+```
+
+The script evaluates the following parameter combinations:
+
+```text
+Bottleneck: 8, 16, 32, 64, 128, 256, 512
+Sampling: upsampling, downsampling, SMOTE
+```
+
+## Output
+
+Predictions are saved to:
+
+```text
+example_output/
+```

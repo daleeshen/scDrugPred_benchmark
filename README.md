@@ -1,0 +1,186 @@
+# scDrugBenchmark
+
+This repository contains the code used in the study:
+
+**Predicting Pre-treatment Resistance or Post-treatment Effect? A Systematic Benchmarking of Single-Cell Drug Response Models**
+
+The repository provides the scripts used for benchmark dataset construction, model execution, performance evaluation, lineage-tracing analyses, training-label substitution, scDEAL ablation analysis, PDAC analysis, and complementary evaluation of single-cell foundation models.
+
+Large benchmark datasets, pretrained model files, reference data, and Docker/runtime environments are distributed separately through Zenodo to keep the GitHub repository lightweight and easier to navigate.
+
+## Repository Structure
+
+```text
+scDrugBenchmark_github/
+├── analyses/
+│   ├── label_substitution/
+│   ├── lineage_tracing/
+│   │   ├── ReSisTrace/
+│   │   └── Watermelon/
+│   ├── PDAC/
+│   └── scDEAL_ablation/
+├── benchmark_construction/
+├── data/
+├── evaluation/
+├── foundation_models/
+│   ├── scfoundation-main/
+│   └── scGPT-main/
+└── methods/
+    ├── Beyondcell/
+    ├── CaDRReS-sc/
+    ├── DREEP/
+    ├── DrugFormer/
+    ├── Precily/
+    ├── SCAD/
+    ├── scDEAL/
+    ├── scDr/
+    └── scIDUC/
+```
+
+### `benchmark_construction/`
+
+Scripts used to generate the balanced and imbalanced benchmark datasets.
+
+### `methods/`
+
+Benchmark implementations and execution scripts for the nine task-specific single-cell drug response prediction methods:
+
+- Beyondcell
+- CaDRReS-sc
+- DREEP
+- DrugFormer
+- Precily
+- SCAD
+- scDEAL
+- scDr
+- scIDUC
+
+Method-specific instructions, required files, environment setup, input format, and example commands are provided in the corresponding `README.md` files.
+
+### `foundation_models/`
+
+Scripts used for the complementary evaluation of:
+
+- scGPT
+- scFoundation
+
+The benchmark includes within-dataset and cross-dataset evaluations. Large pretrained model files and other required resources are distributed separately through Zenodo.
+
+### `analyses/`
+
+Scripts for the additional analyses performed in the study:
+
+- `label_substitution/` – training-label comparison and substitution between SCAD and scDEAL
+- `lineage_tracing/` – ReSisTrace and Watermelon analyses
+- `scDEAL_ablation/` – scDEAL component ablation analysis
+- `PDAC/` – downstream analysis of the in-house PDAC organoid dataset
+
+### `evaluation/`
+
+Scripts used to summarize and evaluate prediction results from the balanced and imbalanced benchmark settings.
+
+### `data/`
+
+Scripts used to prepare method-specific example inputs.
+
+The example datasets required to reproduce the demonstration workflows are distributed through Zenodo. See `data/README.md` for details.
+
+## Data and Runtime Environments
+
+Large files are not stored directly in this GitHub repository.
+
+The following resources are available from Zenodo:
+
+**Zenodo:** https://doi.org/10.5281/zenodo.23260161
+
+The Zenodo archive contains:
+
+- example benchmark datasets;
+- processed data required for selected analyses;
+- large reference files;
+- pretrained model files;
+- method-specific resources excluded from GitHub because of file size;
+- Docker and runtime environment files required to reproduce the benchmark.
+
+The environment archive is organized under:
+
+```text
+scDrugBenchmark_env/
+```
+
+Several methods require files from `scDrugBenchmark_env` to be copied into the corresponding GitHub method directory before execution. Detailed instructions are provided in each method-specific `README.md`.
+
+## Quick Start
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/[USERNAME]/scDrugBenchmark.git
+cd scDrugBenchmark
+```
+
+### 2. Download the required data and environment files
+
+Download the Zenodo archive:
+
+```text
+https://doi.org/10.5281/zenodo.23260161
+```
+
+Extract the archive so that both repositories are available locally, for example:
+
+```text
+project/
+├── scDrugBenchmark_github/
+└── scDrugBenchmark_env/
+```
+
+### 3. Prepare method-specific resources
+
+Some methods require large reference data, pretrained models, or method-specific files from `scDrugBenchmark_env`.
+
+Follow the instructions in the corresponding method directory before building the environment or running the example:
+
+```text
+methods/<METHOD>/README.md
+```
+
+### 4. Prepare example input data
+
+Method-specific example inputs can be generated using the scripts in:
+
+```text
+data/
+```
+
+For example:
+
+```bash
+cd data
+Rscript prepare_tpm_example.R
+Rscript prepare_drugformer_example.R
+Rscript prepare_precily_example.R
+Rscript prepare_scdeal_example.R
+```
+
+Only the preparation scripts required for the method being tested need to be executed.
+
+### 5. Run a benchmark method
+
+Each supported method directory contains its own execution instructions and example command.
+
+For example:
+
+```text
+methods/CaDRReS-sc/README.md
+methods/DrugFormer/README.md
+methods/Precily/README.md
+methods/SCAD/README.md
+methods/scDEAL/README.md
+```
+
+Please follow the method-specific README because the required runtime environment and input format differ among methods.
+
+## Benchmark Settings
+
+The benchmark includes

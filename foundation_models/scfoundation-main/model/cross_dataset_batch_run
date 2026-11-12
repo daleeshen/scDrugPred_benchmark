@@ -1,0 +1,132 @@
+#!/bin/bash
+
+set -uo pipefail
+
+MODEL_ROOT="/home/ubuntu/lishen/scFoundation-main/model"
+EMBED_ROOT="$MODEL_ROOT/embeds"
+LABEL_ROOT="$MODEL_ROOT/labels"
+SCDATA_ROOT="$MODEL_ROOT/scdata"
+RESULT_ROOT="$MODEL_ROOT/results_cross"
+LOG_ROOT="$MODEL_ROOT/logs_cross"
+MAIN_SCRIPT="$MODEL_ROOT/benchmarking_main_EBD_cross.py"
+
+OVERWRITE="${OVERWRITE:-0}"
+RUN_ID="$(date '+%Y%m%d_%H%M%S')"
+SUMMARY_FILE="$LOG_ROOT/cross_summary_${RUN_ID}.tsv"
+
+mkdir -p "$RESULT_ROOT" "$LOG_ROOT"
+printf 'timestamp\tsetting\tdrug\ttrain_dataset\ttest_dataset\tstatus\tlog_file\n' > "$SUMMARY_FILE"
+
+
+# ============================================================
+# Function: run one directional cross-dataset prediction
+# ============================================================
+run_cross() {
+    dir="$1"
+    relative_dir="$2"
+    drug="$3"
+    train_name="$4"
+    test_name="$5"
+
+    train_data_file="$dir/${train_name}_embeds.npy"
+    train_label_file="$LABEL_ROOT/$relative_dir/${train_name}_labels.npy"
+    test_data_file="$dir/${test_name}_embeds.npy"
+    test_label_file="$LABEL_ROOT/$relative_dir/${test_name}_labels.npy"
+    test_input_file="$SCDATA_ROOT/$relative_dir/${test_name}.txt"
+
+    output_dir="$RESULT_ROOT/$relative_dir/$drug"
+    log_dir="$LOG_ROOT/$relative_dir/$drug"
+    result_file="$output_dir/${train_name}_to_${test_name}.csv"
+    prediction_file="$output_dir/${train_name}_to_${test_name}_predictions.csv"
+    log_file="$log_dir/${train_name}_to_${test_name}_${RUN_ID}.log"
+
+    if [ ! -f "$train_data_file" ] || [ ! -f "$train_label_file" ] || \
+       [ ! -f "$test_data_file" ] || [ ! -f "$test_label_file" ] || \
+       [ ! -f "$test_input_file" ]; then
+        return 0
+    fi
+
+    mkdir -p "$output_dir" "$log_dir"
+
+    echo ""
+    echo "============================================================"
+    echo "Cross-dataset prediction"
+    echo "Setting: $relative_dir"
+    echo "Drug   : $drug"
+    echo "Train  : $train_name"
+    echo "Test   : $test_name"
+    echo "Result : $result_file"
+    echo "============================================================"
+
+    if [ "$OVERWRITE" != "1" ] && [ -s "$result_file" ] && [ -s "$prediction_file" ]; then
+        echo "SKIPPED: completed result already exists" | tee "$log_file"
+        printf '%s\t%s\t%s\t%s\t%s\tSKIPPED\t%s\n' \
+            "$(date '+%F %T')" "$relative_dir" "$drug" "$train_name" "$test_name" "$log_file" >> "$SUMMARY_FILE"
+        return 0
+    fi
+
+    if python "$MAIN_SCRIPT" \
+        --train_data_file "$train_data_file" \
+        --train_label_file "$train_label_file" \
+        --test_data_file "$test_data_file" \
+        --test_label_file "$test_label_file" \
+        --test_input_file "$test_input_file" \
+        --output_file "$result_file" 2>&1 | tee "$log_file"
+    then
+        if [ -s "$result_file" ] && [ -s "$prediction_file" ]; then
+            printf '%s\t%s\t%s\t%s\t%s\tSUCCESS\t%s\n' \
+                "$(date '+%F %T')" "$relative_dir" "$drug" "$train_name" "$test_name" "$log_file" >> "$SUMMARY_FILE"
+        else
+            echo "ERROR: result or prediction file was not created"
+            printf '%s\t%s\t%s\t%s\t%s\tFAILED\t%s\n' \
+                "$(date '+%F %T')" "$relative_dir" "$drug" "$train_name" "$test_name" "$log_file" >> "$SUMMARY_FILE"
+        fi
+    else
+        printf '%s\t%s\t%s\t%s\t%s\tFAILED\t%s\n' \
+            "$(date '+%F %T')" "$relative_dir" "$drug" "$train_name" "$test_name" "$log_file" >> "$SUMMARY_FILE"
+    fi
+}
+
+
+# ============================================================
+# Loop through balanced and imbalance settings
+# ============================================================
+find "$EMBED_ROOT/balanced" "$EMBED_ROOT/imbalance" -type d -print0 |
+while IFS= read -r -d '' dir
+do
+    relative_dir="${dir#$EMBED_ROOT/}"
+
+    # ========================================================
+    # IBRUTINIB
+    # GSE111014 <-> GSE152469
+    # ========================================================
+    run_cross "$dir" "$relative_dir" "IBRUTINIB" "GSE111014" "GSE152469"
+    run_cross "$dir" "$relative_dir" "IBRUTINIB" "GSE152469" "GSE111014"
+
+
+    # ========================================================
+    # PACLITAXEL
+    # ========================================================
+    PAC_DATASETS=(
+        "GSE131984_Pac_DMSO_rm"
+        "GSE163836"
+        "GSE169246_PacBlood"
+        "GSE169246_PacTissue"
+    )
+
+    for train_name in "${PAC_DATASETS[@]}"
+    do
+        for test_name in "${PAC_DATASETS[@]}"
+        do
+            if [ "$train_name" = "$test_name" ]; then
+                continue
+            fi
+
+            run_cross "$dir" "$relative_dir" "PACLITAXEL" "$train_name" "$test_name"
+        done
+    done
+done
+
+echo ""
+echo "Cross-dataset batch finished"
+echo "Summary: $SUMMARY_FILE"

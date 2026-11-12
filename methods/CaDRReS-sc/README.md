@@ -1,0 +1,135 @@
+# CaDRReS-sc
+
+This directory contains the scripts used to reproduce the CaDRReS-sc predictions in the benchmark.
+
+## Files
+
+- `CaDRReS-sc/auto_script.py` – auto scripts used to generate predictions.
+- `CaDRReS-sc/model_training.py` – model-training script.
+- `run_cadrres_example.sh` – runs CaDRReS-sc on the example datasets.
+
+The complete CaDRReS-sc runtime environment, including the Docker environment, reference files, dependencies, and pretrained model files, is provided separately through Zenodo because of its large size.
+
+## Download the CaDRReS-sc Environment
+
+Download the `scDrugBenchmark_env` archive from Zenodo:
+
+**Zenodo:** https://doi.org/10.5281/zenodo.23260161
+
+After extraction, locate:
+
+```text
+scDrugBenchmark_env/
+└── CaDRReS-sc/
+    └── CaDRReS-sc/
+```
+
+This directory contains the CaDRReS-sc source code, reference data, pretrained models, and files required to build the Docker environment.
+
+Before building the Docker image, copy the benchmark-specific `auto_script.py` and `model_training.py` from the GitHub repository into the downloaded CaDRReS-sc environment:
+
+```bash
+cp scDrugBenchmark_github/methods/CaDRReS-sc/CaDRReS-sc/auto_script.py \
+   scDrugBenchmark_env/CaDRReS-sc/CaDRReS-sc/
+
+cp scDrugBenchmark_github/methods/CaDRReS-sc/CaDRReS-sc/model_training.py \
+   scDrugBenchmark_env/CaDRReS-sc/CaDRReS-sc/
+```
+
+These files should replace the corresponding files in the downloaded environment.
+
+## Input
+
+CaDRReS-sc uses a TPM expression matrix with genes as rows and cells as columns.
+
+The example TPM matrices are generated from the sampled Seurat objects using:
+
+```bash
+cd scDrugBenchmark_github/data
+Rscript prepare_tpm_example.R
+```
+
+The prepared inputs are stored under:
+
+```text
+data/example/
+├── balanced_1000/
+│   └── TPM_metadata/
+├── imbalanced_1_3/
+│   └── TPM_metadata/
+└── imbalanced_1_30/
+    └── TPM_metadata/
+```
+
+Each scenario contains three independently sampled rounds.
+
+## Build the Docker Environment
+
+After copying `auto_script.py` and `model_training.py`, move to the downloaded CaDRReS-sc environment:
+
+```bash
+cd scDrugBenchmark_env/CaDRReS-sc
+```
+
+Build the Docker image:
+
+```bash
+sudo docker build -t scdrugbenchmark-cadrres .
+```
+
+## Start the Docker Container
+
+Run the container and mount the GitHub repository so that the example input data and output directories are accessible inside the container:
+
+```bash
+sudo docker run --rm -it \
+-v /path/to/scDrugBenchmark_github:/workspace \
+scdrugbenchmark-cadrres
+```
+
+Replace `/path/to/scDrugBenchmark_github` with the actual path to the cloned GitHub repository.
+
+## Pretrained Models
+
+Two pretrained CaDRReS-sc models are evaluated:
+
+```text
+cadrres-wo-sample-bias
+cadrres-wo-sample-bias-weight
+```
+
+The corresponding pretrained model files are included in the downloaded Zenodo environment.
+
+## Running the Example
+
+Inside the Docker container, move to the CaDRReS-sc method directory:
+
+```bash
+cd /workspace/methods/CaDRReS-sc
+```
+
+Run:
+
+```bash
+PYTHON_EXEC=python ./run_cadrres_example.sh
+```
+
+The script automatically processes the balanced and imbalanced example datasets and evaluates both pretrained CaDRReS-sc model specifications.
+
+## Output
+
+Prediction files are written to:
+
+```text
+example_output/
+├── balanced_1000/
+├── imbalanced_1_3/
+└── imbalanced_1_30/
+```
+
+For each input round, two prediction files are generated, corresponding to the two pretrained model specifications. For example:
+
+```text
+GSE108397_1round_cadrres-wo-sample-bias_test_pred.csv
+GSE108397_1round_cadrres-wo-sample-bias-weight_test_pred.csv
+```
